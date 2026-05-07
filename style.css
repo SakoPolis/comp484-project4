@@ -221,3 +221,106 @@ body {
 #top-scores li {
     margin-bottom: 0.35em;
 }
+
+/* Theme classes */
+.theme-gruvbox {
+    background-color: #282828;
+    color: #ebdbb2;
+}
+.theme-gruvbox .masthead {
+    background-color: #3c3836;
+}
+.theme-gruvbox .intro {
+    background: #504945;
+}
+.theme-gruvbox .test-wrapper {
+    border-color: #689d6a !important;
+}
+.theme-gruvbox #reset {
+    color: #fb4934;
+    border-color: #fb4934;
+}
+.theme-gruvbox .stats,
+.theme-gruvbox .scoreboard,
+.theme-gruvbox #origin-text {
+    background: #3c3836;
+    color: #ebdbb2;
+    border-color: #504945;
+}
+.theme-gruvbox .test-wrapper textarea {
+    background: #282828;
+    color: #ebdbb2;
+}
+.theme-gruvbox #origin-text p {
+    color: #ebdbb2;
+}
+
+.theme-evangelion {
+    background-color: #0b0f1a;
+    color: #f7f1ff;
+}
+.theme-evangelion .masthead {
+    background-color: #1b0030;
+}
+.theme-evangelion .intro {
+    background: #2b1b3a;
+}
+.theme-evangelion .test-wrapper {
+    border-color: #7b61ff !important;
+}
+.theme-evangelion #reset {
+    color: #ff6ac1;
+    border-color: #ff6ac1;
+}
+.theme-evangelion .stats,
+.theme-evangelion .scoreboard,
+.theme-evangelion #origin-text {
+    background: #21102a;
+    color: #f7f1ff;
+    border-color: #2b1b3a;
+}
+.theme-evangelion .test-wrapper textarea {
+    background: #12081a;
+    color: #f7f1ff;
+}
+.theme-evangelion #origin-text p {
+    color: #f7f1ff;
+}
+
+.theme-cyberpunk {
+    background-color: #122331;
+    color: #c0f8ff;
+}
+.theme-cyberpunk .masthead {
+    background-color: #0f1724;
+}
+.theme-cyberpunk .intro {
+    background: #06202a;
+}
+.theme-cyberpunk .test-wrapper {
+    border-color: #ff007f !important;
+}
+.theme-cyberpunk #reset {
+    color: #a59a00;
+    border-color: #00afa1;
+}
+.theme-cyberpunk .stats,
+.theme-cyberpunk .scoreboard,
+.theme-cyberpunk #origin-text {
+    background: #041018;
+    color: #c0f8ff;
+    border-color: #06202a;
+}
+.theme-cyberpunk .test-wrapper textarea {
+    background: #021017;
+    color: #c0f8ff;
+}
+.theme-cyberpunk #origin-text p {
+    color: #c0f8ff;
+}
+
+.theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

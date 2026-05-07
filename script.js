@@ -1,11 +1,11 @@
-const testWrapper = document.querySelector(".test-wrapper");
-const testArea = document.querySelector("#test-area");
-const originTextParagraph = document.querySelector("#origin-text p");
-const resetButton = document.querySelector("#reset");
-const theTimer = document.querySelector(".timer");
-const wpmDisplay = document.querySelector("#wpm");
-const errorDisplay = document.querySelector("#errors");
-const topScoresList = document.querySelector("#top-scores");
+let testWrapper;
+let testArea;
+let originTextParagraph;
+let resetButton;
+let theTimer;
+let wpmDisplay;
+let errorDisplay;
+let topScoresList;
 
 const borderColors = {
 	default: "grey",
@@ -14,14 +14,30 @@ const borderColors = {
 	complete: "#2e7d32"
 };
 
-const passages = [
-	"The quick brown fox jumps over the lazy dog near the quiet village pond at sunset.",
-	"Practice does not make perfect by itself, but steady focused practice makes strong progress every day.",
-	"A calm morning routine can improve your concentration, energy, and mood for the rest of the day.",
-	"When building software, small readable functions often prevent bugs and make future updates easier.",
-	"Typing with accuracy first and speed second usually leads to better long term performance and confidence.",
-	"Great developers test edge cases early so unexpected behavior is discovered before it reaches production."
-];
+const themePassages = {
+	gruvbox: [
+		"In the low light of the workshop, the wooden desk held tools worn smooth by patient hands.",
+		"A warm cup on a cold evening and the soft glow of the lamp make steady work feel timeless.",
+		"Simple routines, practiced quietly, build the strong habits that steady a busy life.",
+		"Old vinyl records crackle as the kettle whistles, and the house settles into familiar rhythms.",
+		"Careful steps through a well-known path bring comfort more than haste ever could."
+	],
+	evangelion: [
+		"This is the impenetrable Wall of Jericho. Take one step over this wall and you're a dead man.",
+		"Never underestimate the ability of the human animal to adapt to its environment.",
+		"Correct. An object tens of millimeters in diameter crashed into Antarctica at more than ten percent of the speed of light!",
+		"God's in his heaven. All's right with the world.",
+		"Is it okay to see these? What a surprise! This is INT-C! With these, we can program much faster than we thought, right, Ma'am?"
+	],
+	cyberpunk: [
+		"Wake the fuck up, Samurai. We have a city to burn.",
+		"I saw corps strip farmers of water... and eventually of land.",
+		"It's a war against the fuckin' forces of entropy, understand?!",
+		"First, bullet to the brain would've ended you on the spot. Second, woulda never survived the rest 'thout my expert advice.",
+		"Whatever, choom. Like I give a shit.",
+		"Huh, you just discovered what it takes to become a legend... Grab your iron - let's mobilize."
+	]
+};
 
 const scoreStorageKey = "typingTopScores";
 
@@ -30,7 +46,7 @@ let interval;
 let timerRunning = false;
 let errors = 0;
 let mismatchActive = false;
-let currentOriginText = originTextParagraph.textContent;
+let currentOriginText = "";
 
 
 // Add leading zero to numbers 9 or below (purely for aesthetics):
@@ -184,9 +200,13 @@ function formatTime(totalHundredths) {
 
 
 function setRandomPassage() {
-	const randomIndex = Math.floor(Math.random() * passages.length);
-	currentOriginText = passages[randomIndex];
-	originTextParagraph.textContent = currentOriginText;
+	// Determine active theme by checking the select in DOM, then localStorage, then default
+	const themeSelectEl = document.querySelector('#theme-select');
+	const activeTheme = (themeSelectEl && themeSelectEl.value) || localStorage.getItem('typingTestTheme') || 'gruvbox';
+	const pool = themePassages[activeTheme] || themePassages['gruvbox'];
+	const randomIndex = Math.floor(Math.random() * pool.length);
+	currentOriginText = pool[randomIndex];
+	if (originTextParagraph) originTextParagraph.textContent = currentOriginText;
 }
 
 
@@ -209,9 +229,93 @@ function reset() {
 
 
 // Event listeners for keyboard input and the reset button:
-testArea.addEventListener("input", start, false);
-testArea.addEventListener("input", spellCheck, false);
-resetButton.addEventListener("click", reset, false);
+function init() {
+	// Query DOM elements now that DOM is ready
+	testWrapper = document.querySelector(".test-wrapper");
+	testArea = document.querySelector("#test-area");
+	originTextParagraph = document.querySelector("#origin-text p");
+	resetButton = document.querySelector("#reset");
+	theTimer = document.querySelector(".timer");
+	wpmDisplay = document.querySelector("#wpm");
+	errorDisplay = document.querySelector("#errors");
+	topScoresList = document.querySelector("#top-scores");
 
-setRandomPassage();
-renderTopScores();
+	// Attach event listeners
+	testArea.addEventListener("input", start, false);
+	testArea.addEventListener("input", spellCheck, false);
+	resetButton.addEventListener("click", reset, false);
+
+	// Prevent pasting to ensure user types the text manually
+	testArea.addEventListener('paste', function (e) {
+		e.preventDefault();
+		if (testWrapper) testWrapper.style.borderColor = borderColors.error;
+		if (!mismatchActive) {
+			errors++;
+			if (errorDisplay) errorDisplay.textContent = errors;
+			mismatchActive = true;
+		}
+	});
+
+	// Block Ctrl+V / Cmd+V
+	testArea.addEventListener('keydown', function (e) {
+		if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+			e.preventDefault();
+			if (testWrapper) testWrapper.style.borderColor = borderColors.error;
+			if (!mismatchActive) {
+				errors++;
+				if (errorDisplay) errorDisplay.textContent = errors;
+				mismatchActive = true;
+			}
+		}
+	});
+
+	// Prevent dropping text into the textarea
+	testArea.addEventListener('drop', function (e) {
+		e.preventDefault();
+		if (testWrapper) testWrapper.style.borderColor = borderColors.error;
+	});
+
+	// Theme switching: swap body classes and persist selection
+	const themeSelectLocal = document.querySelector('#theme-select');
+	const themeStorageKey = 'typingTestTheme';
+
+	function applyTheme(name) {
+		document.body.classList.remove('theme-gruvbox', 'theme-evangelion', 'theme-cyberpunk');
+		if (name === 'gruvbox') document.body.classList.add('theme-gruvbox');
+		if (name === 'evangelion') document.body.classList.add('theme-evangelion');
+		if (name === 'cyberpunk') document.body.classList.add('theme-cyberpunk');
+	}
+
+	function saveTheme(name) {
+		try { localStorage.setItem(themeStorageKey, name); } catch (e) {}
+	}
+
+	if (themeSelectLocal) {
+		themeSelectLocal.addEventListener('change', function (e) {
+			applyTheme(e.target.value);
+			saveTheme(e.target.value);
+			// refresh passage when theme changes
+			setRandomPassage();
+		});
+	}
+
+	// Initialize theme from storage (or default to gruvbox)
+	try {
+		const stored = localStorage.getItem(themeStorageKey) || 'gruvbox';
+		if (themeSelectLocal) themeSelectLocal.value = stored;
+		applyTheme(stored);
+	} catch (e) {
+		if (themeSelectLocal) themeSelectLocal.value = 'gruvbox';
+		applyTheme('gruvbox');
+	}
+
+	// set initial passage and scores
+	setRandomPassage();
+	renderTopScores();
+}
+
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', init);
+} else {
+	init();
+}
